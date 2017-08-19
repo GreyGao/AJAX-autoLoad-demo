@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="UTF-8">
+    <title>Ajax页面懒加载</title>
+    <style>
+        *{margin:0;padding:0;font-size:16px;}
+        ul,ol{list-style: none;}
+        #list{max-width:680px;margin:0 auto; display:flex;flex-wrap: wrap; justify-content: space-between;}
+        #list li {width:calc(33.333333% - 10px); outline:1px solid green;margin-bottom:40px;}
+        #list li > div {padding-top: 100%; position: relative;}
+        #list li > div > img{width:100%;height:auto; position: absolute; top:0;}
+        .footbar{height:50px;}
+        .header{height:100px;}
+        #loadMoreBox{text-align: center;margin:30px;font-size:14px;color:#999}
+    </style>
+</head>
+<body>
+    <div class="header"></div>
+    <ol id="list"></ol>
+    <div id="loadMoreBox"></div>
+    <div class="footbar"></div>
+</body>
+<script src="//apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script>
+    let list = document.querySelector('#list');
+    let loadMoreBox = document.querySelector('#loadMoreBox');
+    //DOM创建页面
+    for(var i=0; i<9; i++){
+        let li = document.createElement('li');
+        let div = document.createElement('div');
+        let img = document.createElement('img');
+        div.className = 'oneToOne';
+        div.appendChild(img);
+        img.src = '//via.placeholder.com/200x200?text='+ Math.random().toFixed(3);
+        let p = document.createElement('p');
+        p.textContent = `这是第${i+1}张图`;
+        list.appendChild(li);
+        li.appendChild(div);
+        li.appendChild(p)
+    }
+
+    //懒加载AJAX
+    let n=1;
+    let loading = false;
+    let haveNextPage = true;
+    let loadMore = function () {
+        if(loading) {return};
+        if(!haveNextPage){return};
+        let request = new XMLHttpRequest();
+        request.open('GET', `./page-${n + 1}.json`);
+        request.onerror = function () {
+            loading = false;
+        };
+        request.onload = function () {
+            let response = request.responseText;
+            //JSON.parse 輸入符合JSON语法的字符串，输出JSON对应的数据
+            let data = JSON.parse(response);
+            for (let i = 0; i < data.content.length; i++) {
+                let li = `
+              <li>
+                 <div class="oneToOne">
+                    <img src="https://i.loli.net/2017/08/19/59983023eb8fe.gif
+" data-xxx ="${data.content[i].url}">
+                 </div>
+                 <p>${data.content[i].text}</p>
+              </li>`;
+                list.insertAdjacentHTML('beforeend', li);
+            }
+            if (data.hasNextPage === false) {
+                haveNextPage = false;
+                loadMoreBox.textContent = '已到底'
+            }
+            n += 1;
+            loading=false;
+        };
+        loading = true;
+        request.send();
+    };
+
+
+    // 触发条件函数
+    function inScreen(element){
+        var doc = document.documentElement;
+        var clientHeight = doc.clientHeight;
+        var viewportOffset = element.getBoundingClientRect();
+        var buttonTop = viewportOffset.top;
+        if((buttonTop + 10 )< clientHeight ){
+            return true
+        }
+    }
+
+    // 判断内容是否出现在屏幕里
+    window.onscroll= function () {
+        if(inScreen(loadMoreBox)===true){
+            loadMore()
+        }
+
+        let images = document.querySelectorAll('img[data-xxx]');
+        for(let i=0; i<images.length; i++){
+            if(inScreen(images[i])){
+                images[i].src = images[i].getAttribute('data-xxx');
+                images[i].removeAttribute('data-xxx');
+            }
+        }
+    };
+
+
+</script>
+</html>

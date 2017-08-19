@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="UTF-8">
+    <title>Ajax页面自动加载</title>
+    <style>
+        *{margin:0;padding:0;font-size:16px;}
+        ul,ol{list-style: none;}
+        #list{max-width:680px;margin:0 auto; display:flex;flex-wrap: wrap; justify-content: space-between;}
+        #list li {width:calc(33.333333% - 10px); outline:1px solid green;}
+        #list li > div {padding-top: 100%; position: relative;}
+        #list li > div > img{width:100%;height:auto; position: absolute; top:0;}
+        #loadMoreBtn{margin:0 auto;
+            background: #7ed934; border-radius: 20px; text-shadow: 1px 1px 3px #666666;
+            border: solid #236616 0 ; color: #ffffff; font-size: 18px;
+            padding: 12px 25px 12px 25px; text-decoration: none;}
+        .loadMore{text-align: center;margin:30px;}
+        .footbar{height:100px;}
+    </style>
+</head>
+<body>
+    <ol id="list"></ol>
+    <div class="loadMore"><button type="button" id="loadMoreBtn">加载更多</button></div>
+    <div class="footbar"></div>
+</body>
+<script src="//apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script>
+    let list = document.querySelector('#list');
+    //DOM创建页面
+    for(var i=0; i<9; i++){
+        let li = document.createElement('li');
+        let div = document.createElement('div');
+        let img = document.createElement('img');
+        div.className = 'oneToOne';
+        div.appendChild(img);
+        img.src = '//via.placeholder.com/200x200?text='+ Math.random().toFixed(3);
+        let p = document.createElement('p');
+        p.textContent = `这是第${i+1}张图`;
+        list.appendChild(li);
+        li.appendChild(div);
+        li.appendChild(p)
+    }
+
+    //自动加载AJAX
+    let n=1;
+    let loading = false;
+    let haveNextPage = true;
+    loadMoreBtn.onclick = function () {
+        if(loading) {return};
+        if(!haveNextPage){return};
+        let request = new XMLHttpRequest();
+        request.open('GET', `./page-${n + 1}.json`);
+        request.onerror = function () {
+            loading = false;
+        };
+        request.onload = function () {
+            let response = request.responseText;
+            //JSON.parse 輸入符合JSON语法的字符串，输出JSON对应的数据
+            let data = JSON.parse(response);
+            for (let i = 0; i < data.content.length; i++) {
+                let li = `
+              <li>
+                 <div class="oneToOne">
+                    <img src="${data.content[i].url}">
+                 </div>
+                 <p>${data.content[i].text}</p>
+              </li>`;
+                list.insertAdjacentHTML('beforeend', li);
+            }
+            if (data.hasNextPage === false) {
+                loadMoreBtn.onclick = null;
+                loadMoreBtn.textContent = "已到底";
+                haveNextPage = false;
+            }
+            n += 1;
+            loading=false;
+        };
+        loading = true;
+        request.send();
+    };
+
+    // 触发条件
+    window.onscroll = function () {
+        var doc = document.documentElement;
+        var clientHeight = doc.clientHeight;
+        var viewportOffset = loadMoreBtn.getBoundingClientRect();
+        var buttonTop = viewportOffset.top;
+        if((buttonTop + 120 )< clientHeight ){
+            loadMoreBtn.click();
+        }
+    }
+
+</script>
+</html>
