@@ -20,7 +20,7 @@
    - 判断数据是否正在请求，如果正在请求，不要重复请求（针对网速慢的情况）；
 
 ### 预览地址
-
+https://greygao.github.io/AJAX-autoLoad-demo/index1.html
 
 
 
@@ -43,3 +43,4 @@
 
 ### 预览地址
 
+https://greygao.github.io/AJAX-autoLoad-demo/index2.html
