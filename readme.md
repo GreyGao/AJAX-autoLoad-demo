@@ -41,6 +41,6 @@ https://greygao.github.io/AJAX-autoLoad-demo/index1.html
 2. 判断图片进入了用户的页面范围，则获取到对应的图片并将src内容替换为data中的地址，删除data属性；
 3. 这样当用户滚动到对应的位置才会开始请求出现在页面里的图片内容。
 
-### 预览地址
+### 预览地址 (可使用限制网速来模拟效果)
 
 https://greygao.github.io/AJAX-autoLoad-demo/index2.html
